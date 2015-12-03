@@ -1,0 +1,14 @@
+abstraction
+cannibalism
+composition
+computation
+conjunction
+formulation
+headquarter
+instruction
+preposition
+programming
+responsible
+subordinate
+temperature
+EOF

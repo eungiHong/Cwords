@@ -1,11 +1,16 @@
 #include "GridGenerator.h"
 
+#define horizontal 100
+#define vertical -100
+#define crossing -50
+#define closed -30
+
 // »ý¼ººÎ: ±×¸®µå¸¦ ±×¸®´Â ÇÏÀ§ºÎ¹®
 GridGenerator::GridGenerator(int length) {  // »ý¼ºÀÚ
 	gridLength = length;
 	grid = new char*[gridLength];
 	for (int i = 0; i < gridLength; i++) {
-		grid[i] = new char[gridLength];
+		grid[i] = new char[gridLength];  // ÀÌÁßÆ÷ÀÎÅÍ·Î 2Â÷¿ø ¹è¿­À» µ¿ÀûÇÒ´ç
 	}
 
 	for (int i = 0; i < gridLength; i++) {
@@ -37,16 +42,16 @@ void GridGenerator::symmetricalCloser(int x, int y) {  // ´ëÄªÇÏ¿© ´Ý±â, (±×¸®µå
 inline bool GridGenerator::randomlyAndSymmetricallyClose() {  // ¹«ÀÛÀ§·Î ´ÝµÇ, ´ÝÈù Ä­°ú ´ëÄªµÇ´Â Ä­µµ ÇÔ²² ´Ý±â
 	random_device rd;
 	mt19937_64 rng(rd());
-	uniform_int_distribution<__int64> dist(0, gridLength - 1);
+	uniform_int_distribution<__int64> dist(0, gridLength - 1); // 0¿¡¼­ (±×¸®µåÀÇ ±æÀÌ - 1)±îÁöÀÇ ³­¼ö »ý¼º
 
 	int x = dist(rng);
 	int y = dist(rng);
 
 	if (grid[x][y] == 'O') {
 		symmetricalCloser(x, y);
-		return true;
+		return true; // ¼º°ø½Ã true ¹ÝÈ¯
 	}
-	return false;
+	return false; // ½ÇÆÐ½Ã (ÀÌ¹Ì ´ÝÇô ÀÖ´Â °æ¿ì) false ¹ÝÈ¯
 }
 
 void GridGenerator::recursiveRowCloser(int x, int y) {  // ÇÏ³ªÀÇ ÇàÀ» ÇÑ Ä­¾¿ °Ç³Ê¶Ù¾î ´ÝÀ¸¸é¼­ ±×¿Í ´ëÄªµÇ´Â Ä­µµ ÇÔ²² ´Ý±â
@@ -57,14 +62,14 @@ void GridGenerator::recursiveRowCloser(int x, int y) {  // ÇÏ³ªÀÇ ÇàÀ» ÇÑ Ä­¾¿ °
 	}
 }
 
-void GridGenerator::makeAtOnce() {  // ´Ù¾çÇÑ ¸Þ¼Òµå¸¦ ¼¯¾î¼­ ÇÑ ¹ø ±×¸®µå ¸¸µé±â
-	// À§¿¡¼­ ¾Æ·§¹æÇâÀ¸·Î ±×¸®µåÀÇ Áß°£¼±±îÁö ÇÑ Ä­¾¿ ¶ç¿ö¼­ (ÇÑ Ä­¾¿ ¶ç¿ö¼­ ÇàÀ» ´Ý´Â) recursiveRowCloser Àû¿ë 
+void GridGenerator::makeAtOnce() {  // ´Ù¾çÇÑ ¸Þ¼Òµå¸¦ ¼¯¾î¼­ ÇÑ ¹ø¿¡ ±×¸®µå ¸¸µé±â
+	// À§¿¡¼­ ¾Æ·§¹æÇâÀ¸·Î ±×¸®µåÀÇ Áß°£¼±±îÁö ÇÑ Ä­¾¿ ¶ç¿ö¼­ recursiveRowCloser Àû¿ë 
 	for (int i = 0; i < gridLength / 2 + 1; i += 2) { // (1, 0), Áï i = 1¿¡¼­ºÎÅÍ ´Ý¾Æµµ ÁÁÀ½
 		recursiveRowCloser(i, 0);
 	}
-	int counter = 0;
 
 	// ÇÑ ¹ø ÆÐÅÏÈ­µÈ ±×¸®µå¿¡ ´ëÇØ¼­ ·£´ýÇÏ°Ô Ä­ ´Ý±â
+	int counter = 0;
 	switch (gridLength) { // ±×¸®µåÀÇ ±æÀÌ°¡ 11ÀÏ °æ¿ì i < 9, 13ÀÏ °æ¿ì i < 14°¡ Àû´ç..
 	case 11:
 		while (true) {
@@ -97,13 +102,13 @@ void GridGenerator::makeAtOnce() {  // ´Ù¾çÇÑ ¸Þ¼Òµå¸¦ ¼¯¾î¼­ ÇÑ ¹ø ±×¸®µå ¸¸µé±
 		}
 		break;
 	}
-	if (wellFormednessValidator() == false) { // Á¤ÇüÀÇ ±×¸®µå°¡ ¾Æ´Ò °æ¿ì, ´Ù½Ã ¹Ýº¹
+	if (wellFormednessValidator() == false) { // Á¤ÇüÀÇ ±×¸®µå°¡ ¾Æ´Ò °æ¿ì, ÃÊ±âÈ­ ÈÄ, ±×¸®µå Àç»ý¼º
 		openAtOnce();
 		makeAtOnce();
 	}
 }
 
-void GridGenerator::openAtOnce() {
+void GridGenerator::openAtOnce() { // ±×¸®µå ÃÊ±âÈ­
 	for (int i = 0; i < gridLength; i++) {
 		for (int j = 0; j < gridLength; j++) {
 			grid[i][j] = 'O';
@@ -112,7 +117,7 @@ void GridGenerator::openAtOnce() {
 }
 // »ý¼ººÎ ³¡
 
-// ºí·Ï ÃßÃâºÎ - »ý¼ºµÈ ±×¸®µå°¡ °¡Áö°í ÀÖ´Â ºí·Ï¿¡ ´ëÇÑ Á¤º¸¸¦ ¸®½ºÆ®ÀÇ ¸®½ºÆ®ÀÇ ÇüÅÂ·Î ÃßÃâÇÏ´Â ÇÏÀ§ºÎ¹®
+// ºí·Ï ÃßÃâºÎ - »ý¼ºµÈ ±×¸®µå°¡ °¡Áö°í ÀÖ´Â ºí·Ï¿¡ ´ëÇÑ Á¤º¸¸¦ º¤ÅÍvectorÀÇ ÁýÇÕsetÀÇ ÇüÅÂ·Î ÃßÃâÇÏ´Â ÇÏÀ§ºÎ¹®
 int GridGenerator::rightwardSquareCounter(int x, int y) { // ÀÔ·ÂµÈ ÁÂÇ¥¸¦ Æ÷ÇÔÇÑ ÁÂÇ¥ÀÇ ¿À¸¥ÂÊ ÇàÀÇ ºóÄ­ °³¼ö ±¸ÇÏ±â
 	int count = 0;
 	if (y < gridLength) {
@@ -170,7 +175,7 @@ int GridGenerator::horizontalSquareCounter(int x, int y) {
 int GridGenerator::verticalSquareCounter(int x, int y) {
 	// ÀÔ·ÂµÈ ÁÂÇ¥¿Í ¿¬°áµÈ ¿­ÀÇ ºóÄ­ °³¼ö ±¸ÇÏ±â
 	if (grid[x][y] == 'X') {
-		return -30;
+		return closed;
 	}
 	else {
 		return downwardSquareCounter(x, y) + upwardSquareCounter(x, y) - 1;
@@ -180,19 +185,16 @@ int GridGenerator::verticalSquareCounter(int x, int y) {
 int GridGenerator::getBlockType(int x, int y) {
 	// ÀÔ·ÂµÈ ÁÂÇ¥°¡ ¼öÆò¹æÇâÀÇ ºí·Ï°ú ¿¬°áµÇ¾î ÀÖ´ÂÁö ¼öÁ÷¹æÇâÀÇ ºí·Ï°ú ¿¬°áµÇ¾î ÀÖ´ÂÁö, ¾Æ´Ï¸é µÑ ´Ù ÀÎÁö ¾Ë¾Æ³»±â
 	if (horizontalSquareCounter(x, y) > 1 && verticalSquareCounter(x, y) > 1) {
-		return -50; // ¼öÆò¹æÇâÀÇ ºí·Ï, ¼öÁ÷¹æÇâÀÇ ºí·Ï µÑ ´Ù¿Í ¿¬°áµÇ¾î ÀÖ´Â °æ¿ì
+		return crossing; // ¼öÆò¹æÇâÀÇ ºí·Ï, ¼öÁ÷¹æÇâÀÇ ºí·Ï µÑ ´Ù¿Í ¿¬°áµÇ¾î ÀÖ´Â °æ¿ì
 	}
 	else if (horizontalSquareCounter(x, y) > 1 && verticalSquareCounter(x, y) == 1) {
-		return 100; // ¼öÆò¹æÇâÀÇ ºí·Ï°ú ¿¬°áµÇ¾î ÀÖ´Â °æ¿ì
+		return horizontal; // ¼öÆò¹æÇâÀÇ ºí·Ï°ú ¿¬°áµÇ¾î ÀÖ´Â °æ¿ì
 	}
 	else if (horizontalSquareCounter(x, y) == 1 && verticalSquareCounter(x, y) > 1) {
-		return -100; // ¼öÁ÷¹æÇâÀÇ ºí·Ï°ú ¿¬°áµÇ¾î ÀÖ´Â °æ¿ì
+		return vertical; // ¼öÁ÷¹æÇâÀÇ ºí·Ï°ú ¿¬°áµÇ¾î ÀÖ´Â °æ¿ì
 	}
 	else if (horizontalSquareCounter(x, y) == -30 && verticalSquareCounter(x, y) == -30) {
-		return -30; // ÁÂÇ¥°¡ ´ÝÇôÀÖ´Â °æ¿ì, Áï "X" ÀÎ°æ¿ì
-	}
-	else {
-		return -1;
+		return closed; // ÁÂÇ¥°¡ ´ÝÇôÀÖ´Â °æ¿ì, Áï "X" ÀÎ°æ¿ì
 	}
 }
 
@@ -234,7 +236,7 @@ vector<int> GridGenerator::getInfoOfBlock(int x, int y) { // ÀÔ·ÂµÈ ÁÂÇ¥¿Í ¿¬°áµ
 	int type = getBlockType(x, y);
 	int intersection = -1;
 
-	if (type == 100) { // ¿¬°áµÈ ºí·ÏÀÌ ¼öÆòÀÎ °æ¿ì
+	if (type == horizontal) { // ¿¬°áµÈ ºí·ÏÀÌ ¼öÆòÀÎ °æ¿ì
 		xCoordinate = x;
 		yCoordinate = horizontalCoordinateFinder(x, y);
 		length = horizontalSquareCounter(x, y);
@@ -246,7 +248,7 @@ vector<int> GridGenerator::getInfoOfBlock(int x, int y) { // ÀÔ·ÂµÈ ÁÂÇ¥¿Í ¿¬°áµ
 		}
 		intersection = count;
 	}
-	else if (type == -100) { // ¿¬°áµÈ ºí·ÏÀÌ ¼öÁ÷ÀÎ °æ¿ì
+	else if (type == vertical) { // ¿¬°áµÈ ºí·ÏÀÌ ¼öÁ÷ÀÎ °æ¿ì
 		xCoordinate = verticalCoordinateFinder(x, y);
 		yCoordinate = y;
 		length = verticalSquareCounter(x, y);
@@ -258,14 +260,14 @@ vector<int> GridGenerator::getInfoOfBlock(int x, int y) { // ÀÔ·ÂµÈ ÁÂÇ¥¿Í ¿¬°áµ
 		}
 		intersection = count;
 	}
-	else if (type == -50) {  // ÁÂÇ¥°¡ ±³Â÷Á¡ÀÎ °æ¿ì´Â, Á¤º¸°¡ Áßº¹µÇ¹Ç·Î ´ÝÈù Ä­ÀÎ °æ¿ì¿Í µ¿ÀÏÇÏ°Ô Ã³¸®
+	else if (type == crossing) {  // ÁÂÇ¥°¡ ±³Â÷Á¡ÀÎ °æ¿ì´Â, Á¤º¸°¡ Áßº¹µÇ¹Ç·Î ´ÝÈù Ä­ÀÎ °æ¿ì¿Í µ¿ÀÏÇÏ°Ô Ã³¸®
 		xCoordinate = 0;
 		yCoordinate = 0;
 		length = 0;
 		type = 0;
 		intersection = 0;
 	}
-	else if (type == -30) { // ´ÝÈù Ä­, Áï "X"ÀÎ °æ¿ì
+	else if (type == closed) { // ´ÝÈù Ä­, Áï "X"ÀÎ °æ¿ì
 		xCoordinate = 0;
 		yCoordinate = 0;
 		length = 0;
@@ -273,17 +275,23 @@ vector<int> GridGenerator::getInfoOfBlock(int x, int y) { // ÀÔ·ÂµÈ ÁÂÇ¥¿Í ¿¬°áµ
 		intersection = 0;
 	}
 
-	vector<int> blockInfo;
+	vector<int> blockInfo; // ±³Â÷Á¡, ±æÀÌ, x ÁÂÇ¥, y ÁÂÇ¥, À¯Çü ¼øÀ¸·Î vector¿¡ »ðÀÔ
+	// ÀÌ vectorµéÀ» set ÀÚ·á±¸Á¶¿¡ ÀúÀåÇÏ±â ¶§¹®¿¡, ¸ÕÀú ±³Â÷Á¡ÀÇ °³¼ö¿¡ µû¶ó ¿À¸§Â÷¼øÀ¸·Î Á¤·Ä, 
+	// ±× ´ÙÀ½¿¡´Â ±æÀÌÀÇ Å©±â¿¡ µû¶ó ¿À¸§Â÷¼øÀ¸·Î Á¤·ÄµÊ.
+	// µû¶ó¼­, ³ªÁß¿¡ ºí·Ï¿¡ ³¹¸»À» »ðÀÔÇÒ ¶§, ±³Â÷Á¡ÀÌ ¸¹°í ±æÀÌ°¡ ±ä ºí·ÏºÎÅÍ ³¹¸»À» Ã¤¿ì´Â °ÍÀÌ À¯¸®ÇÏ±â ¶§¹®¿¡,
+	// ²¿¸®¿¡¼­ºÎÅÍ ¸Ó¸® ¹æÇâÀ¸·Î setÀ» ¼øÈ¸
 	blockInfo.push_back(intersection);
 	blockInfo.push_back(length);
 	blockInfo.push_back(xCoordinate);
 	blockInfo.push_back(yCoordinate);
 	blockInfo.push_back(type);
 	
-	return blockInfo;
+	return blockInfo;  // vector ¹ÝÈ¯
 }
 
 set<vector<int>> GridGenerator::getEveryInfoOfBlocks() {
+	// ±×¸®µåÀÇ ¸ðµç ÁÂÇ¥(gridLength x gridLength°³)¸¦ ¼øÈ¸ÇÏ¸é¼­ ±×¸®µåÀÇ ¸ðµç ºí·Ï Á¤º¸ ÃßÃâ
+	// set¿¡ Á¤º¸¸¦ ´ãÀ½À¸·Î½á Áßº¹µÇ´Â ºí·Ï Á¤º¸´Â ÀÚµ¿ÀûÀ¸·Î Ãß°¡µÇÁö ¾ÊÀ½
 	set<vector<int>> everyBlock;
 	
 	for (int i = 0; i < gridLength; i++) {
@@ -336,17 +344,7 @@ bool GridGenerator::wellFormednessValidator() {  // ±×¸®µå°¡ Á¦¾àÁ¶°ÇÀ» ¸¸Á·ÇÏ´Â
 	}
 	return true;
 }
-void GridGenerator::drawGrid() {
-	ofstream fout("c:\\Users\\ekhong\\Documents\\Visual Studio 2015\\Projects\\Crossword\\grid_shape.txt");
-	for (int i = 0; i < gridLength; i++) {
-		for (int j = 0; j < gridLength; j++) {
-			fout << grid[i][j] << " ";
-		}
-		fout << endl;
-	}
-	fout.close();
-}
-void GridGenerator::showGrid() { // ±×¸®µå Àü½Ã
+void GridGenerator::showGrid() { // ±×¸®µå¸¦ Àü½Ã
 	for (int i = 0; i < gridLength; i++) {
 		for (int j = 0; j < gridLength; j++) {
 			cout << grid[i][j] << " ";

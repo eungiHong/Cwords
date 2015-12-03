@@ -7,7 +7,6 @@
 #include <set>
 #include <iostream>
 #include <random>
-#include <fstream>
 
 using namespace std;
 
@@ -32,6 +31,8 @@ private:
 	vector<int> getInfoOfBlock(int x, int y);
 	int horizontalCoordinateFinder(int x, int y);
 	int verticalCoordinateFinder(int x, int y);
+	int closedSquareCounter();
+	int openedSquareCounter();
 	bool wellFormednessValidator();
 
 public:
@@ -39,9 +40,6 @@ public:
 	~GridGenerator();
 	void makeAtOnce();
 	set<vector<int>> getEveryInfoOfBlocks();
-	int closedSquareCounter();
-	int openedSquareCounter();
-	void drawGrid();
 	void showGrid();
 	
 	
